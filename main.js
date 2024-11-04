@@ -1,10 +1,5 @@
-let state = {
-    todos: []
-};
-
 const ADD_TODO = 'ADD_TODO';
 const REMOVE_TODO = 'REMOVE_TODO';
-
 
 function addTodoAction(todo) {
     return {
@@ -37,36 +32,45 @@ function todoReducer(state, action) {
     }
 }
 
+function createStore(reducer) {
+    let state = { todos: [] };
+
+    function dispatch(action) {
+        state = reducer(state, action);
+        render();
+    }
+
+    function getState() {
+        return state;
+    }
+
+    return { dispatch, getState };
+}
+
+const store = createStore(todoReducer);
+
 function render() {
     const todoList = document.getElementById('todoList');
     todoList.innerHTML = '';
-    state.todos.forEach((todo, index) => {
+    store.getState().todos.forEach((todo, index) => {
         const li = document.createElement('li');
         li.textContent = todo;
         const removeButton = document.createElement('button');
         removeButton.textContent = 'Remove';
         removeButton.onclick = () => {
-            dispatch(removeTodoAction(index));
+            store.dispatch(removeTodoAction(index));
         };
         li.appendChild(removeButton);
         todoList.appendChild(li);
     });
 }
 
-
-function dispatch(action) {
-    state = todoReducer(state, action);
-    render();
-}
-
-
 document.getElementById('addButton').onclick = () => {
     const input = document.getElementById('todoInput');
     if (input.value) {
-        dispatch(addTodoAction(input.value));
-        input.value = ''; 
+        store.dispatch(addTodoAction(input.value));
+        input.value = '';
     }
 };
-
 
 render();
